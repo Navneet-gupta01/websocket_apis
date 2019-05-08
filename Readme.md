@@ -5,7 +5,7 @@
 ### Run Project
 ```scala
 	git clone git@github.com:Navneet-gupta01/websocket_apis.git
-	cd assingment
+	cd websocket_apis
 	sbt run
 ```
 
