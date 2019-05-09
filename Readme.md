@@ -2,6 +2,8 @@
 
 ## Websocket Apis
 
+### Notes
+* Single User can have only one Active Session only. Old Session will get Logged out in case New Connection used.  
 ### Run Project
 ```scala
 	git clone git@github.com:Navneet-gupta01/websocket_apis.git
