@@ -11,7 +11,11 @@ case  class InMemoryState(subscribers: Set[String], tables: List[table], allowed
     case login(us, ps) =>
       val filteredUser  = allowedUsers.filter(u => (u.username == us && u.password == ps))
       if(filteredUser.size > 0)
-        (this.copy(connected = connected + (us -> (req.user, filteredUser.head.userType))), Seq(UserReqWrapper(req.user, login_successful(filteredUser.head.userType))))
+        connected.find(_._1 == us).fold(
+          (this.copy(connected = connected + (us -> (req.user, filteredUser.head.userType))), Seq(UserReqWrapper(req.user, login_successful(filteredUser.head.userType)))))(cu => {
+          val oldConnectionUUID = cu._2._1
+          (this.copy(connected = connected + (us -> (req.user, filteredUser.head.userType))), Seq(UserReqWrapper(req.user, login_successful(filteredUser.head.userType)), UserReqWrapper(oldConnectionUUID, AnotherSession("Disconnecting Current Session, Another Client LoggedIn"))))
+        })
       else
         (this, Seq(UserReqWrapper(req.user, login_failed)))
     case ping(seq) =>
