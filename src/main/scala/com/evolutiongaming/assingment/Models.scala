@@ -30,6 +30,7 @@ case class UnexpectedFailure(msg: String) extends Message
 case object Disconnect extends Message
 case object Connect extends Message
 case object KeepActive extends Message
+case object EmptyMessage extends Message
 
 case class UserReqWrapper(user: String, msg: Message)
 

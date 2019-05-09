@@ -16,7 +16,7 @@ object Server extends IOApp{
     topic <- Topic[IO, UserReqWrapper](UserReqWrapper("", Connect))
     ref <- Ref.of[IO, InMemoryState](InMemoryState())
     exitCode <- {
-      val httpStream = ServerChannel.channel[IO](9090, ref, queue, topic)
+      val httpStream = ServerChannel.channel[IO](9000, ref, queue, topic)
       val keepAlive = Stream.awakeEvery[IO](30.seconds).map(_ => UserReqWrapper("",KeepActive)).through(topic.publish)
 
       val processingStream =
@@ -37,7 +37,7 @@ object Server extends IOApp{
 }
 
 object ServerChannel {
-  def channel[F[_]: ConcurrentEffect : Timer: ContextShift](port: Int, state: Ref[F, InMemoryState], queue: Queue[F, UserReqWrapper], topic: Topic[F, UserReqWrapper]): fs2.Stream[F, ExitCode] =
+  def channel[F[_]: ConcurrentEffect : ContextShift](port: Int, state: Ref[F, InMemoryState], queue: Queue[F, UserReqWrapper], topic: Topic[F, UserReqWrapper]): fs2.Stream[F, ExitCode] =
     BlazeServerBuilder[F]
       .bindHttp(port, "0.0.0.0")
       .withIdleTimeout(300.seconds)

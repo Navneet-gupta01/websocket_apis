@@ -17,7 +17,7 @@ class ApiRotues[F[_]](state: Ref[F,InMemoryState], queue: Queue[F, UserReqWrappe
 
   def uuid = UUID.randomUUID().toString()
   val endpoints: HttpRoutes[F] = HttpRoutes.of[F] {
-    case GET -> Root / "ws" =>
+    case GET -> Root / "ws_api" =>
       WebSocketFlow.createChannel(state,queue,topic)
   }
 }
@@ -38,7 +38,6 @@ object WebSocketFlow {
         .collect({
           case Text(text, _) => JsonUtils.decode(text) match {
             case Left(ex) =>
-              println(ex)
               UserReqWrapper(connectionUUID,UnexpectedFailure(s"parsing failed for msg ${text}"))
             case Right(msg) => UserReqWrapper(connectionUUID, msg)
           }

@@ -10,7 +10,7 @@
 ```
 
 ## Use Apis
-ws://localhost:9090/ws
+ws://localhost:9000/ws_api
 
 ## As Admin
 ```scala
