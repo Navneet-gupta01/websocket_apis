@@ -12,13 +12,14 @@ import org.http4s.server.websocket.WebSocketBuilder
 import org.http4s.websocket.WebSocketFrame
 import org.http4s.websocket.WebSocketFrame._
 
-class ApiRotues[F[_]](state: Ref[F,InMemoryState], queue: Queue[F, UserReqWrapper], topic: Topic[F, UserReqWrapper])
+class ApiRotues[F[_]](state: Ref[F, InMemoryState], queue: Queue[F, UserReqWrapper], topic: Topic[F, UserReqWrapper])
                      (implicit F: Sync[F], C: ContextShift[F]) extends Http4sDsl[F] {
 
   def uuid = UUID.randomUUID().toString()
+
   val endpoints: HttpRoutes[F] = HttpRoutes.of[F] {
     case GET -> Root / "ws_api" =>
-      WebSocketFlow.createChannel(state,queue,topic)
+      WebSocketFlow.createChannel(state, queue, topic)
   }
 }
 
@@ -26,19 +27,19 @@ class ApiRotues[F[_]](state: Ref[F,InMemoryState], queue: Queue[F, UserReqWrappe
 object WebSocketFlow {
   def uuid = UUID.randomUUID().toString
 
-  def toClient[F[_]: Sync: ContextShift](connectionUUID: String, topic: Topic[F, UserReqWrapper]): Stream[F, Text]  =
+  def toClient[F[_]](connectionUUID: String, topic: Topic[F, UserReqWrapper]): Stream[F, Text] =
     topic
-    .subscribe(1000)
-    .filter(a => a.user == connectionUUID)
-    .map(msg => Text(JsonUtils.toJson(msg.msg)))
+      .subscribe(1000)
+      .filter(a => a.user == connectionUUID)
+      .map(msg => Text(JsonUtils.toJson(msg.msg)))
 
-  def processMessages[F[_]: Sync:ContextShift](stream: Stream[F, WebSocketFrame], connectionUUID: String, queue: Queue[F, UserReqWrapper]): Stream[F, Unit] = {
+  def processMessages[F[_]](stream: Stream[F, WebSocketFrame], connectionUUID: String, queue: Queue[F, UserReqWrapper]): Stream[F, Unit] = {
     val parsedWebSocketInput: Stream[F, UserReqWrapper] =
       stream
         .collect({
           case Text(text, _) => JsonUtils.decode(text) match {
             case Left(ex) =>
-              UserReqWrapper(connectionUUID,UnexpectedFailure(s"parsing failed for msg ${text}"))
+              UserReqWrapper(connectionUUID, UnexpectedFailure(s"parsing failed for msg ${text}"))
             case Right(msg) => UserReqWrapper(connectionUUID, msg)
           }
 
@@ -47,7 +48,7 @@ object WebSocketFlow {
     parsedWebSocketInput.through(queue.enqueue)
   }
 
-  def createChannel[F[_]: Sync: ContextShift](state: Ref[F,InMemoryState], queue: Queue[F, UserReqWrapper], topic: Topic[F, UserReqWrapper]) = {
+  def createChannel[F[_] : Sync : ContextShift](state: Ref[F, InMemoryState], queue: Queue[F, UserReqWrapper], topic: Topic[F, UserReqWrapper]) = {
     val connectionUUID = uuid
 
     def inputStreamFlow(stream: Stream[F, WebSocketFrame]) =

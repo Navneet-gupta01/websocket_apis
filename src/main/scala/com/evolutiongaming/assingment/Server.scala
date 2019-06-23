@@ -10,14 +10,14 @@ import org.http4s.syntax.kleisli._
 import scala.concurrent.duration._
 import fs2.Stream
 
-object Server extends IOApp{
+object Server extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = for {
     queue <- Queue.unbounded[IO, UserReqWrapper]
     topic <- Topic[IO, UserReqWrapper](UserReqWrapper("", Connect))
     ref <- Ref.of[IO, InMemoryState](InMemoryState())
     exitCode <- {
       val httpStream = ServerChannel.channel[IO](9000, ref, queue, topic)
-      val keepAlive = Stream.awakeEvery[IO](30.seconds).map(_ => UserReqWrapper("",KeepActive)).through(topic.publish)
+      val keepAlive = Stream.awakeEvery[IO](30.seconds).map(_ => UserReqWrapper("", KeepActive)).through(topic.publish)
 
       val processingStream =
         queue
@@ -37,7 +37,7 @@ object Server extends IOApp{
 }
 
 object ServerChannel {
-  def channel[F[_]: ConcurrentEffect : ContextShift](port: Int, state: Ref[F, InMemoryState], queue: Queue[F, UserReqWrapper], topic: Topic[F, UserReqWrapper]): fs2.Stream[F, ExitCode] =
+  def channel[F[_] : ConcurrentEffect : ContextShift](port: Int, state: Ref[F, InMemoryState], queue: Queue[F, UserReqWrapper], topic: Topic[F, UserReqWrapper]): fs2.Stream[F, ExitCode] =
     BlazeServerBuilder[F]
       .bindHttp(port, "0.0.0.0")
       .withIdleTimeout(300.seconds)

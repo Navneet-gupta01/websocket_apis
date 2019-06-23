@@ -8,8 +8,9 @@ import io.circe.syntax._
 object JsonUtils {
   implicit val genDevConfig: Configuration = Configuration.default.withDiscriminator("$type")
 
-  def decode(str : String) : scala.Either[io.circe.Error, Message] = {
+  def decode(str: String): scala.Either[io.circe.Error, Message] = {
     io.circe.parser.decode[Message](str)
   }
-  def toJson(msg : Message) = msg.asJson.pretty(Printer.noSpaces.copy(dropNullValues = true))
+
+  def toJson(msg: Message) = msg.asJson.pretty(Printer.noSpaces.copy(dropNullValues = true))
 }

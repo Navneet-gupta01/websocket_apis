@@ -23,7 +23,8 @@ lazy val root = (project in file("."))
       "io.circe"        %% "circe-parser"        % CirceVersion,
       "org.specs2"      %% "specs2-core"         % Specs2Version % "test",
       "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
-      "org.typelevel"   %% "cats-core"           % catVersion
+      "org.typelevel"   %% "cats-core"           % catVersion,
+      "org.scalatest" %% "scalatest" % "3.0.5" % "test"
     ),
     addCompilerPlugin("org.spire-math" %% "kind-projector"     % "0.9.6"),
     addCompilerPlugin("com.olegpy"     %% "better-monadic-for" % "0.2.4")
